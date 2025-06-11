@@ -1,0 +1,5 @@
+### Consultar balance da conta 1
+GET http://localhost:3003/balances/1
+
+### Consultar balance da conta 2
+GET http://localhost:3003/balances/2
