@@ -1,10 +1,15 @@
 FROM python:3.11-slim
 
-WORKDIR /src
+RUN python -m pip install --upgrade pip
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt /app/requirements.txt
 
-COPY src src
+RUN pip install -r /app/requirements.txt
 
-CMD ["uvicorn", "src.main:src", "--host", "0.0.0.0", "--port", "3003"]
+RUN rm /app/requirements.txt
+
+COPY src/ app/
+
+WORKDIR /app
+
+ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "3003"]

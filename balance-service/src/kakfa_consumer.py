@@ -1,7 +1,6 @@
 from kafka import KafkaConsumer
+from pymongo import MongoClient
 import json
-from .database import SessionLocal
-from .models import Balance
 import threading
 import os
 
@@ -14,7 +13,11 @@ def start_consumer():
             value_deserializer=lambda m: json.loads(m.decode("utf-8"))
         )
 
-        db = SessionLocal()
+        DATABASE_URL = os.getenv('DATABASE_URL', "mongodb://root:changeme@balance-mongo")
+
+        mongo_client = MongoClient(DATABASE_URL)
+        mongo_database = mongo_client['account']
+        collection = mongo_database['balance']
 
         for message in consumer:
             event = message.value
@@ -24,14 +27,14 @@ def start_consumer():
             balance_account_id_to = float(event['balance_account_id_to'])
 
             for account_id, amount in [(account_id_from, balance_account_id_from),
-                                        (account_id_to, balance_account_id_to)] 
-                balance = db.query(Balance).filter_by(account_id=account_id).first()
+                                        (account_id_to, balance_account_id_to)]:
+                
+                balance = collection.find_one({'account_id':account_id})
                 if balance:
                     balance.amount = amount
                 else:
-                    balance = Balance(account_id=account_id, amount=amount)
-                    db.add(balance)
-                db.commit()
+                    balance = {'account_id':account_id,'amount': amount}
+                    collection.insert_one(balance)
     
     thread = threading.Thread(name='kafka-consumer-daemon', 
                                 target=consume, 

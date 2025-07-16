@@ -71,15 +71,17 @@ services:
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
 
-  balance-db:
-    image: postgres:15
-    restart: always
+  balance-mongo:
+    image: mongo
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: balance
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: changeme
     ports:
-      - "5433:5432"
+      - "27017:27017"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
   
   balance-service:
     build: ./balance-service
@@ -87,8 +89,7 @@ services:
       - "3003:3003"
     depends_on:
       - kafka
-      - balance-db
+      - balance-mongo
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      DATABASE_URL: postgresql://user:password@balance-db:5432/balance
-  
+      DATABASE_URL: "mongodb://root:changeme@balance-mongo"
