@@ -1,5 +1,3 @@
-### Consultar balance da conta 1
-GET http://localhost:3003/balances/1
+### Consultar balance da conta f8df753c-3b58-43aa-8016-12aaa4f1ea3e
+POST http://localhost:3003/balances/f8df753c-3b58-43aa-8016-12aaa4f1ea3e
 
-### Consultar balance da conta 2
-GET http://localhost:3003/balances/2
